@@ -1,0 +1,151 @@
+openapi: 3.0.1
+info:
+  title: mod_shortlink API
+  version: "1.2"
+  description: REST API for creating and managing short URLs.
+servers:
+  - url: /api/shortlink
+paths:
+  /shorturl:
+    post:
+      summary: Create a short URL
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: title
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shorturl:
+                    type: string
+                  status:
+                    type: string
+                    example: success
+  /expand:
+    get:
+      summary: Expand a short URL
+      parameters:
+        - name: shorturl
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Expanded URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  longurl:
+                    type: string
+  /url-stats:
+    get:
+      summary: Retrieve statistics for a single short URL
+      parameters:
+        - name: shorturl
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Per-link stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shortlink"
+  /stats:
+    get:
+      summary: List statistics
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [top, bottom, rand, last]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Aggregated stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Shortlink"
+                  filter:
+                    type: string
+  /db-stats:
+    get:
+      summary: Global statistics
+      responses:
+        "200":
+          description: Totals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: integer
+                  clicks:
+                    type: integer
+  /version:
+    get:
+      summary: Return module version
+      responses:
+        "200":
+          description: Version info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+components:
+  schemas:
+    Shortlink:
+      type: object
+      properties:
+        id:
+          type: integer
+        keyword:
+          type: string
+        url:
+          type: string
+        title:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        clicks:
+          type: integer
